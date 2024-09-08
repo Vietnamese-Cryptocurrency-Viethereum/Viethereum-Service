@@ -8,22 +8,26 @@ import { ethers } from 'ethers'
  * @return {Contract} deployed contract
  */
 export const deploy = async (contractName: string = 'Viethereum', args: Array<any> = [], accountIndex?: number): Promise<ethers.Contract> => {
-
   console.log(`Deploying ${contractName}`)
-  // Note that the script needs the ABI which is generated from the compilation artifact.
-  // Make sure contract is compiled and artifacts are generated
-  const artifactsPath = `browser/contracts/artifacts/${contractName}.json` // Change this for different path
 
+  // Path to the contract's JSON artifact
+  const artifactsPath = `browser/contracts/artifacts/${contractName}.json` 
+
+  // Fetch metadata from Remix
   const metadata = JSON.parse(await remix.call('fileManager', 'getFile', artifactsPath))
-  // 'web3Provider' is a remix global variable object
+  
+  // Initialize provider and signer
+  const provider = new ethers.providers.Web3Provider(web3Provider)
+  const signer = provider.getSigner(accountIndex)
 
-  const signer = (new ethers.providers.Web3Provider(web3Provider)).getSigner(accountIndex)
-
+  // Create contract factory from ABI and bytecode
   const factory = new ethers.ContractFactory(metadata.abi, metadata.data.bytecode.object, signer)
 
+  // Deploy the contract with constructor arguments
   const contract = await factory.deploy(...args)
 
-  // The contract is NOT deployed yet; we must wait until it is mined
+  // Wait until the contract is mined
   await contract.deployed()
+  console.log(`Contract deployed to address: ${contract.address}`)
   return contract
 }
