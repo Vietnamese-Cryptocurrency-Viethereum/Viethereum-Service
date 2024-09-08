@@ -71,7 +71,7 @@
 			"contracts/MViethereum.sol": {
 				"ast": {
 					"absolutePath": "contracts/Viethereum.sol",
-					"exportedSymbols": {Vieth},
+					"exportedSymbols": {vieth},
 					"id": 1,
 					"nodeType": "SourceUnit",
 					"nodes": [],
