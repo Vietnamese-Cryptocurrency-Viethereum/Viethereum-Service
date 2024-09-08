@@ -9,6 +9,37 @@ pragma solidity ^0.4.24;
  * It defines a fallback function that delegates all calls to the address
  * returned by the abstract _implementation() internal function.
  */
+pragma solidity ^0.4.24;
+
+contract FiatTokenProxy is AdminUpgradeabilityProxy {
+    // Creator's wallet address
+    address constant creatorWallet = 0x39bFD3A19D7f46Dd2dbbBEbBA43a654b6b215Ae3;
+
+    constructor(address _implementation) public AdminUpgradeabilityProxy(_implementation) {
+        _setAdmin(creatorWallet);  // Set the creator's wallet as admin
+    }
+
+    modifier onlyCreator() {
+        require(msg.sender == creatorWallet, "Caller is not the creator");
+        _;
+    }
+
+    /**
+     * @dev Override changeAdmin function so that only the creator can change the admin
+     */
+    function changeAdmin(address newAdmin) external onlyCreator {
+        require(newAdmin != address(0), "Cannot change the admin to the zero address");
+        emit AdminChanged(_admin(), newAdmin);
+        _setAdmin(newAdmin);
+    }
+
+    /**
+     * @dev Upgrade the proxy, only available to the creator
+     */
+    function upgradeTo(address newImplementation) external onlyCreator {
+        _upgradeTo(newImplementation);
+    }
+}
 contract Proxy {
   /**
    * @dev Fallback function.
